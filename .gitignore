@@ -15,10 +15,6 @@ __pycache__/
 # DVC cache
 .dvc/cache/
 
-# Data
-data/raw/*
-data/processed/*
-
 # Models
 models/*
 
