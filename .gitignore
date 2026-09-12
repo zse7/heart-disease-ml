@@ -1,5 +1,6 @@
 # Virtual environment
 .venv/
+.venv_heart/
 
 # Python
 __pycache__/
@@ -12,11 +13,14 @@ __pycache__/
 # macOS
 .DS_Store
 
-# DVC cache
+# DVC
 .dvc/cache/
+.dvc/tmp/
+*.dvc.lock
 
-# Models
+# Models (бинарники; код и DVC-метаданные коммитим)
 models/*
+!models/.gitkeep
 
 # IDE
 .idea/
