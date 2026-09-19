@@ -1,4 +1,4 @@
-"""Кастомные трансформеры для варианта 17."""
+"""Кастомные трансформеры для лабораторных и практических работ."""
 
 from __future__ import annotations
 
@@ -23,6 +23,29 @@ class AgeSquaredTransformer(BaseEstimator, TransformerMixin):
         if self.age_col not in X_out.columns:
             raise ValueError(f"Колонка '{self.age_col}' отсутствует в данных")
         X_out[self.out_col] = X_out[self.age_col].astype(float) ** 2
+        return X_out
+
+    def get_feature_names_out(self, input_features=None):
+        if input_features is None:
+            return [self.out_col]
+        names = list(input_features)
+        if self.out_col not in names:
+            names.append(self.out_col)
+        return names
+
+
+class MissingCountTransformer(BaseEstimator, TransformerMixin):
+    """Добавляет признак «число пропусков в строке»."""
+
+    def __init__(self, out_col: str = "missing_count"):
+        self.out_col = out_col
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        X_out = X.copy() if isinstance(X, pd.DataFrame) else pd.DataFrame(X)
+        X_out[self.out_col] = X_out.isna().sum(axis=1).astype(float)
         return X_out
 
     def get_feature_names_out(self, input_features=None):
