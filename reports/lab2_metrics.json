@@ -1,0 +1,94 @@
+{
+  "variant": 17,
+  "lab": 2,
+  "missingness": "MAR (~12% in chol, trestbps, thalach; depends on age)",
+  "outliers_injected": true,
+  "imputation_comparison": [
+    {
+      "imputer": "simple",
+      "cv_roc_auc_mean": 0.8791763791763791,
+      "cv_roc_auc_std": 0.0385778038419427
+    },
+    {
+      "imputer": "knn",
+      "cv_roc_auc_mean": 0.883048433048433,
+      "cv_roc_auc_std": 0.03515868654401419
+    },
+    {
+      "imputer": "iterative",
+      "cv_roc_auc_mean": 0.8802253302253302,
+      "cv_roc_auc_std": 0.03777615335345959
+    }
+  ],
+  "outlier_detection": {
+    "n_outliers": 13,
+    "figure": "/Users/zesmolovaya/Desktop/Prpdv-m/heart-disease-ml/reports/figures/lab2_outliers_pca.png"
+  },
+  "feature_selection_comparison": [
+    {
+      "method": "all_poly_features",
+      "n_features": 52,
+      "cv_roc_auc_mean": 0.8707459207459207,
+      "cv_roc_auc_std": 0.03376588671172535
+    },
+    {
+      "method": "mutual_info_SelectKBest",
+      "n_features": 30,
+      "cv_roc_auc_mean": 0.8704610204610205,
+      "cv_roc_auc_std": 0.04553950079195193
+    },
+    {
+      "method": "lasso_SelectFromModel",
+      "n_features": "adaptive",
+      "cv_roc_auc_mean": 0.8751877751877754,
+      "cv_roc_auc_std": 0.04057672423452209
+    }
+  ],
+  "final": {
+    "best_params": {
+      "model__C": 2.0,
+      "outlier_remover__contamination": 0.03
+    },
+    "cv_best_roc_auc": 0.8725589225589225,
+    "test_accuracy": 0.8524590163934426,
+    "test_roc_auc": 0.8582251082251082,
+    "n_train": 242,
+    "n_test": 61,
+    "classification_report": {
+      "0": {
+        "precision": 0.88,
+        "recall": 0.7857142857142857,
+        "f1-score": 0.8301886792452831,
+        "support": 28.0
+      },
+      "1": {
+        "precision": 0.8333333333333334,
+        "recall": 0.9090909090909091,
+        "f1-score": 0.8695652173913043,
+        "support": 33.0
+      },
+      "accuracy": 0.8524590163934426,
+      "macro avg": {
+        "precision": 0.8566666666666667,
+        "recall": 0.8474025974025974,
+        "f1-score": 0.8498769483182937,
+        "support": 61.0
+      },
+      "weighted avg": {
+        "precision": 0.8547540983606557,
+        "recall": 0.8524590163934426,
+        "f1-score": 0.8514907408652618,
+        "support": 61.0
+      }
+    },
+    "figures": {
+      "final": "/Users/zesmolovaya/Desktop/Prpdv-m/heart-disease-ml/reports/figures/lab2_final_metrics.png"
+    },
+    "model_path": "/Users/zesmolovaya/Desktop/Prpdv-m/heart-disease-ml/models/heart_disease_lab2_pipeline.joblib"
+  },
+  "figures": {
+    "imputation": "/Users/zesmolovaya/Desktop/Prpdv-m/heart-disease-ml/reports/figures/lab2_imputation_chol.png",
+    "outliers_pca": "/Users/zesmolovaya/Desktop/Prpdv-m/heart-disease-ml/reports/figures/lab2_outliers_pca.png",
+    "final": "/Users/zesmolovaya/Desktop/Prpdv-m/heart-disease-ml/reports/figures/lab2_final_metrics.png"
+  }
+}

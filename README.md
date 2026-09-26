@@ -1,6 +1,13 @@
-# Heart Disease ML — Лабораторная работа 1 (вариант 17)
+# Heart Disease ML — вариант 17
 
-Воспроизводимый ML-проект по датасету **Heart Disease (UCI / Cleveland)**: Git + DVC, пайплайн `sklearn` с кастомным трансформером «возраст в квадрате».
+Воспроизводимый ML-проект по датасету **Heart Disease (UCI / Cleveland)**: Git + DVC, пайплайны `sklearn` / `imblearn`.
+
+| Лаба | Тема | Ноутбук / скрипт |
+|------|------|------------------|
+| 1 | Pipeline + `age²` | `notebooks/lab1_heart_disease.ipynb`, `src/models/train.py` |
+| 2 | Импутация, выбросы, отбор признаков | `notebooks/lab2_feature_engineering.ipynb`, `src/models/train_lab2.py` |
+
+---
 
 ## Вариант
 
@@ -9,28 +16,29 @@
 | № | 17 |
 | Датасет | Heart Disease (UCI) |
 | Задача | Классификация |
-| Целевая переменная | `target` (наличие болезни) |
-| Кастомный трансформер | Добавляет признак `age_squared = age²` |
+| Целевая переменная | `target` |
+| Лаба 1 — трансформер | `age_squared = age²` |
+| Лаба 2 — методы | Simple / KNN / Iterative · IsolationForest · MI + Lasso |
 
 ## Структура проекта
 
 ```text
 heart-disease-ml/
-├── data/
-│   ├── raw/
-│   │   ├── heart_disease.csv      # под DVC (не в git)
-│   │   └── heart_disease.csv.dvc
-│   └── processed/
-├── models/                        # joblib-модели (gitignore)
+├── data/raw/
+│   ├── heart_disease.csv          # под DVC
+│   └── heart_disease.csv.dvc
+├── models/                        # joblib (gitignore)
 ├── notebooks/
-│   └── lab1_heart_disease.ipynb
+│   ├── lab1_heart_disease.ipynb
+│   └── lab2_feature_engineering.ipynb
 ├── reports/
-│   └── metrics.json
+│   ├── metrics.json               # лаба 1
+│   ├── lab2_metrics.json
+│   └── figures/                   # графики лабы 2
 ├── src/
-│   ├── data/make_dataset.py       # загрузка + искусственные пропуски
-│   ├── features/transformers.py   # AgeSquaredTransformer
-│   └── models/train.py            # пайплайн + GridSearchCV
-├── .dvc/
+│   ├── data/make_dataset.py
+│   ├── features/transformers.py
+│   └── models/train.py, train_lab2.py
 ├── requirements.txt
 └── README.md
 ```
@@ -38,74 +46,91 @@ heart-disease-ml/
 ## Быстрый старт
 
 ```bash
-# окружение (уже есть .venv_heart, либо создайте своё)
-python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+source .venv_heart/bin/activate   # или: python -m venv .venv && pip install -r requirements.txt
+pip install imbalanced-learn      # если ещё нет в окружении
 
-# данные
-python -m src.data.make_dataset
-
-# DVC (если ещё не инициализирован)
-dvc init
+python -m src.data.make_dataset   # MAR-пропуски + выбросы (лаба 2)
 dvc add data/raw/heart_disease.csv
-git add data/raw/heart_disease.csv.dvc data/raw/.gitignore .dvc .dvcignore
 
-# обучение
-python -m src.models.train
+python -m src.models.train        # лаба 1
+python -m src.models.train_lab2   # лаба 2
 
-# ноутбук
-jupyter lab notebooks/lab1_heart_disease.ipynb
+jupyter lab notebooks/lab2_feature_engineering.ipynb
 ```
 
-## Что сделано по шагам задания
+---
 
-1. **Структура каталогов** — `data/raw`, `data/processed`, `notebooks`, `src`, `models`, `reports`.
-2. **Git** — репозиторий инициализирован, `.gitignore` настроен.
-3. **Виртуальное окружение** — зависимости зафиксированы в `requirements.txt` (pandas, scikit-learn, matplotlib, seaborn, dvc, jupyterlab, …).
-4. **Датасет** — Heart Disease сохранён в `data/raw/heart_disease.csv`. Пропусков не было → искусственно внесено ~10% NaN в числовые колонки `chol` и `trestbps`.
-5. **DVC** — `dvc init`, `dvc add data/raw/heart_disease.csv`.
-6. **Пайплайн**:
-   - split 80/20, `random_state=42`, `stratify=y`;
-   - `AgeSquaredTransformer` (`BaseEstimator` + `TransformerMixin`);
-   - `ColumnTransformer`: числовые → медиана + `StandardScaler`; категориальные → мода + `OneHotEncoder(handle_unknown='ignore')`;
-   - модель: `LogisticRegression` + `GridSearchCV` по `C`.
-7. **Метрики** (тест, n=61) — см. ниже.
-8. **Модель** — `models/heart_disease_pipeline.joblib`.
-9. **Отчёт** — этот README + `reports/metrics.json`.
+# Лабораторная работа 1
 
-## Признаки
-
-- **Числовые:** `age`, `trestbps`, `chol`, `thalach`, `oldpeak`, `age_squared` (создаётся трансформером)
-- **Категориальные:** `sex`, `cp`, `fbs`, `restecg`, `exang`, `slope`, `ca`, `thal`
-
-## Результаты
+Кратко: `AgeSquaredTransformer` + `ColumnTransformer` + `LogisticRegression` / `GridSearchCV`.
 
 | Метрика | Значение |
 |---------|----------|
-| Лучший `C` (GridSearchCV) | `0.1` |
-| CV ROC-AUC (5-fold) | **0.919** |
+| Лучший `C` | `0.1` |
+| CV ROC-AUC | **0.919** |
 | Test Accuracy | **0.869** |
 | Test ROC-AUC | **0.904** |
 
-Выводы:
+Подробности — в истории коммитов / `reports/metrics.json` (метрики лабы 1 на более ранней версии данных с MCAR 10%).
 
-- Пайплайн с импутацией и масштабированием корректно обрабатывает искусственные пропуски.
-- Признак `age²` встроен в конвейер до `ColumnTransformer`, поэтому применяется и на train, и на test без утечки логики.
-- Логистическая регрессия с `C=0.1` даёт устойчивый ROC-AUC ~0.90 на отложенной выборке.
+---
 
-## DVC
+# Лабораторная работа 2
+
+## Что сделано по шагам
+
+1. **Проект / DVC** — структура из модуля 1, данные под DVC.
+2. **Данные** — Heart Disease в `data/raw`.
+   - **MAR ~12%** NaN в `chol`, `trestbps`, `thalach`: вероятность пропуска растёт с `age`  
+     *(у возрастных пациентов лабораторные поля чаще незаполнены — пропуск зависит от наблюдаемого возраста)*.
+   - **Выбросы:** часть значений ×5–10 в тех же колонках.
+3. **Импутация** — сравнение Simple (медиана), KNN, Iterative внутри Pipeline + 5-fold CV ROC-AUC; гистограммы `chol` до/после.
+4. **Выбросы** — IsolationForest, визуализация PCA(2D); кастомный `IsolationForestOutlierRemover` (`fit_resample`) в `imblearn.pipeline.Pipeline` — удаляет только из train.
+5. **Признаки** — `PolynomialFeatures(degree=2)` (+ `age_squared`); отбор **Mutual Information** и **Lasso/L1** (`SelectFromModel`).
+6. **Финал** — полный пайплайн + `GridSearchCV`; оценка на отложенном test.
+7. **Артефакты** — `models/heart_disease_lab2_pipeline.joblib`, `reports/lab2_metrics.json`, `reports/figures/`.
+
+## Сравнение импутеров (CV ROC-AUC, train)
+
+| Импутер | Mean ROC-AUC | Std |
+|---------|--------------|-----|
+| Simple (median) | 0.879 | 0.039 |
+| **KNN** | **0.883** | 0.035 |
+| Iterative | 0.880 | 0.038 |
+
+Перед KNN/Iterative числовые признаки масштабируются через `NanSafeStandardScaler` (scale до импутации при наличии NaN).
+
+## Отбор признаков (после PolynomialFeatures)
+
+| Метод | CV ROC-AUC |
+|-------|------------|
+| Все poly-признаки | 0.871 |
+| Mutual Information (`SelectKBest`, k=30) | 0.870 |
+| **Lasso / L1 (`SelectFromModel`)** | **0.875** |
+
+## Финальная модель (test, n=61)
+
+| Метрика | Значение |
+|---------|----------|
+| Лучшие параметры | `C=2.0`, `contamination=0.03` |
+| CV ROC-AUC | **0.873** |
+| Test Accuracy | **0.852** |
+| Test ROC-AUC | **0.858** |
+
+Графики: `reports/figures/lab2_imputation_chol.png`, `lab2_outliers_pca.png`, `lab2_final_metrics.png`.
+
+## Выводы (лаба 2)
+
+- **KNN-импутация** дала лучший CV ROC-AUC среди трёх методов (небольшой, но стабильный отрыв).
+- IsolationForest находит искусственные и естественные аномалии; remover в imblearn-пайплайне корректно режет **только train**.
+- Полиномиальные признаки без отбора на 242 train-строках не помогают; **L1-отбор** слегка улучшает CV и уменьшает шум.
+- Итоговый test ROC-AUC ~0.86 ниже лабы 1 — ожидаемо: данные «сложнее» (MAR + выбросы + более тяжёлый конвейер).
+
+## Воспроизведение лабы 2
 
 ```bash
-dvc status
-# Data and pipelines are up to date.
-```
-
-Данные лежат в локальном кэше DVC; в git коммитятся только `.dvc`-метаданные.
-
-## Воспроизведение метрик
-
-```bash
-python -m src.models.train
-cat reports/metrics.json
+python -m src.data.make_dataset
+dvc add data/raw/heart_disease.csv
+python -m src.models.train_lab2
+cat reports/lab2_metrics.json
 ```
